@@ -40,28 +40,53 @@ const gate=document.getElementById('passwordGate');if(sessionStorage.getItem('on
 })();
 </script>
 <script>
-// ポータルで名前を登録した人は、名前を最初から選ばれた状態にする（登録は任意・端末内だけの保存）
+// 名前の選択は廃止: ポータルで登録した名前で投票する（ポータル側で登録が必須になったため）
 (function(){
+  function hide(el){ if (el) el.style.display = "none"; }
   try {
-    var raw = localStorage.getItem("onestep.portal.name.v1");
-    if (!raw) return;
-    var name = (JSON.parse(raw) || {}).name;
-    if (!name) return;
     var sel = document.getElementById("member");
-    if (!sel || sel.value) return;
+    if (!sel) return;
+    var name = null;
+    try {
+      var raw = localStorage.getItem("onestep.portal.name.v1");
+      if (raw) name = (JSON.parse(raw) || {}).name;
+    } catch (e) {}
     var target = null;
-    for (var i = 0; i < sel.options.length; i++) {
-      var v = sel.options[i].value;
-      if (!v) continue;
-      if (v === name || v.split("（")[0] === name) { target = v; break; }
+    if (name) {
+      for (var i = 0; i < sel.options.length; i++) {
+        var v = sel.options[i].value;
+        if (!v) continue;
+        if (v === name || v.split("（")[0] === name) { target = v; break; }
+      }
     }
+    var label = document.querySelector('label[for="member"]');
+    var helper = document.querySelector(".helper");
     if (target) {
+      // 登録済み: 選択欄は出さず、名前を固定表示にする
       sel.value = target;
       sel.dispatchEvent(new Event("change"));
-      // 登録した名前で固定し、他の名前を選べないようにする（うっかり防止のため）
       sel.disabled = true;
-      var helper = document.querySelector(".helper");
-      if (helper) helper.textContent = "ポータルで登録した名前（" + target + "）で固定されています";
+      hide(label); hide(sel);
+      if (helper) {
+        helper.textContent = "投票する人：" + target + "さん（ポータルで登録した名前）";
+        helper.style.fontSize = "13px";
+        helper.style.fontWeight = "600";
+        helper.style.color = "var(--ink)";
+      }
+      return;
+    }
+    // 未登録: 投票フォームを出さず、ポータルでの登録を案内する
+    hide(label); hide(sel); hide(helper);
+    document.querySelectorAll(".step-label").forEach(hide);
+    hide(document.querySelector(".search-wrap"));
+    hide(document.getElementById("animeList"));
+    hide(document.getElementById("submit"));
+    var panel = document.querySelector(".main-panel");
+    if (panel) {
+      var guide = document.createElement("div");
+      guide.style.cssText = "background:var(--soft);border-radius:14px;padding:18px;line-height:1.9;font-size:13.5px;color:#315e48";
+      guide.innerHTML = "投票するには、ポータルでお名前の登録が必要です。<br><a href=\"https://shinsuteweb.github.io/shin-onestep-portal/\" style=\"color:var(--green);font-weight:700\">シンOneStepポータルへ ›</a>";
+      panel.appendChild(guide);
     }
   } catch (e) {}
 })();
