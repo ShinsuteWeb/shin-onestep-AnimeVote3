@@ -39,6 +39,29 @@ const gate=document.getElementById('passwordGate');if(sessionStorage.getItem('on
   if(form&&input){form.addEventListener('submit',function(){var v=input.value;if(v){sha(v).then(function(h){if(h===HASH){save(v);}});}});}
 })();
 </script>
+<script>
+// ポータルで名前を登録した人は、名前を最初から選ばれた状態にする（登録は任意・端末内だけの保存）
+(function(){
+  try {
+    var raw = localStorage.getItem("onestep.portal.name.v1");
+    if (!raw) return;
+    var name = (JSON.parse(raw) || {}).name;
+    if (!name) return;
+    var sel = document.getElementById("member");
+    if (!sel || sel.value) return;
+    var target = null;
+    for (var i = 0; i < sel.options.length; i++) {
+      var v = sel.options[i].value;
+      if (!v) continue;
+      if (v === name || v.split("（")[0] === name) { target = v; break; }
+    }
+    if (target) {
+      sel.value = target;
+      sel.dispatchEvent(new Event("change"));
+    }
+  } catch (e) {}
+})();
+</script>
 </body></html>
 
 
