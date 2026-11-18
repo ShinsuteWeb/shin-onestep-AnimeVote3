@@ -58,6 +58,10 @@ const gate=document.getElementById('passwordGate');if(sessionStorage.getItem('on
     if (target) {
       sel.value = target;
       sel.dispatchEvent(new Event("change"));
+      // 登録した名前で固定し、他の名前を選べないようにする（うっかり防止のため）
+      sel.disabled = true;
+      var helper = document.querySelector(".helper");
+      if (helper) helper.textContent = "ポータルで登録した名前（" + target + "）で固定されています";
     }
   } catch (e) {}
 })();
